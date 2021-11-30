@@ -1,3 +1,3 @@
-import { readFile } from '../common.mjs';
+import { readLines } from '../common.mjs';
 
 console.log('test');
