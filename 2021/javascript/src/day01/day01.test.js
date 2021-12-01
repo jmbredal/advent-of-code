@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { solve } from './solver.js';
+import { solve, solve2 } from './solver.js';
 import { readLines } from '../common.js';
 
 const testdata = readLines('src/day01/testdata').map(d => +d);
@@ -9,8 +9,13 @@ describe('day 01', () => {
     assert.equal(1, 1);
   });
 
-  it('should find correct product', () => {
+  it('should solve task 1', () => {
     const solution = solve(testdata);
-    assert.equal(solution, 514579);
+    assert.equal(solution, 7);
+  })
+
+  it('should solve task 2', () => {
+    const solution = solve2(testdata);
+    assert.equal(solution, 5);
   })
 });

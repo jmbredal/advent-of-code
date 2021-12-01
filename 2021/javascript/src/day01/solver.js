@@ -1,19 +1,21 @@
-import { readLines } from '../common.js';
-
-const data = readLines(`src/day01/data`).map(x => +x);
-const solution = solve(data);
-console.log(`Solution day 01:`, solution);
 
 export function solve(data) {
-  const combinations = data.reduce((acc, curr, index, arr) => {
-    const pairs = arr.slice(index + 1).map(x => [curr, x]);
-    return acc.concat(pairs);
-  }, []);
+  return data.map(x => +x).reduce((acc, curr, index) => {
+    if (index === 0) return acc;
 
-  const [a, b] = combinations.filter(c => {
-    const [a, b] = c;
-    return a + b == 2020;
-  })[0];
+    if (curr > data[index - 1]) acc++;
+    return acc;
+  }, 0);
+}
 
-  return a * b;
+export function solve2(_data) {
+  const data = _data.map(x => +x);
+  let counter = 0;
+  for (let i=3; i <= data.length - 1; i++) {
+    const start = i - 3;
+    const previousSum = data.slice(start, i).reduce((a, c) => a + c);
+    const currentSum = data.slice(start + 1 , i + 1).reduce((a, c) => a + c);
+    if (currentSum > previousSum) counter++;
+  }
+  return counter;
 }
