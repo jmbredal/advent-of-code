@@ -1,6 +1,6 @@
 import { readLines } from './common.js';
 
-['day01'].forEach((day) => {
+['day01', 'day02'].forEach((day) => {
   import(`./${day}/solver.js`).then((obj) => {
     const { solve, solve2 } = obj;
     const data = readLines(`./src/${day}/input.txt`);
@@ -9,6 +9,7 @@ import { readLines } from './common.js';
     console.log(`${day} test 2:`, 5, solve2(testdata));
     console.log(`${day} solution 1:`, solve(data));
     console.log(`${day} solution 2:`, solve2(data));
+    console.log('------------------------');
   });
 });
 
