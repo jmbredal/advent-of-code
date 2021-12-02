@@ -1,42 +1,44 @@
 export function solve(data) {
-  const position = data.reduce((acc, curr) => {
-    const [action, value] = curr.split(' ');
+  const position = data.reduce((position, line) => {
+    let [action, value] = line.split(' ');
+    value = +value;
 
     switch (action) {
       case 'forward':
-        acc.pos += +value;
+        position.horizontal += value;
         break;
       case 'up':
-        acc.depth -= +value;
+        position.depth -= value;
         break;
       case 'down':
-        acc.depth += +value;
+        position.depth += value;
         break;
     }
-    return acc;
-  }, { pos: 0, depth: 0 });
+    return position;
+  }, { horizontal: 0, depth: 0 });
 
-  return position.pos * position.depth;
+  return position.horizontal * position.depth;
 }
 
 export function solve2(data) {
-  const position = data.reduce((acc, curr) => {
-    const [action, value] = curr.split(' ');
+  const position = data.reduce((position, line) => {
+    let [action, value] = line.split(' ');
+    value = +value;
 
     switch (action) {
       case 'forward':
-        acc.pos += +value;
-        acc.depth += (acc.aim * +value);
+        position.horizontal += value;
+        position.depth += (position.aim * value);
         break;
       case 'up':
-        acc.aim -= +value;
+        position.aim -= value;
         break;
       case 'down':
-        acc.aim += +value;
+        position.aim += value;
         break;
     }
-    return acc;
-  }, { pos: 0, depth: 0, aim:0 });
+    return position;
+  }, { horizontal: 0, depth: 0, aim: 0 });
 
-  return position.pos * position.depth;
+  return position.horizontal * position.depth;
 }
