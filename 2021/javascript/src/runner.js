@@ -1,6 +1,6 @@
 import { readLines } from './common.js';
 
-['day01', 'day02'].forEach((day) => {
+['day01', 'day02', 'day03'].forEach((day) => {
   import(`./${day}/solver.js`).then((obj) => {
     const { solve, solve2 } = obj;
     const data = readLines(`./src/${day}/input.txt`);
