@@ -12,19 +12,14 @@ export function solve2(filename) {
     return runGame2(bingoNumbers, createBoards(data));
 }
 
-function createBoards(data) {
-    return data.map((d) => {
-        const boardLines = d.split(/\r?\n/);
-        return createBoard(boardLines);
-    });
-}
+function runGame(bingoNumbers, _boards) {
+    let boards = [..._boards];
 
-function runGame(bingoNumbers, boards) {
     for (let i = 0; i < bingoNumbers.length; i++) {
         const bingoNumber = bingoNumbers[i];
-        updateBoards(boards, bingoNumber);
+        boards = updateBoards(boards, bingoNumber);
         const winnerBoards = findWinners(boards);
-        
+
         if (winnerBoards.length > 0) {
             return calculateScore(bingoNumber, winnerBoards[0]);
         }
@@ -35,9 +30,10 @@ function runGame2(bingoNumbers, _boards) {
     let boards = [..._boards];
     let lastWinners = [];
     let lastNumber = 0;
+
     for (let i = 0; i < bingoNumbers.length; i++) {
         const bingoNumber = bingoNumbers[i];
-        updateBoards(boards, bingoNumber);
+        boards = updateBoards(boards, bingoNumber);
 
         const winners = findWinners(boards);
         if (winners.length > 0) {
@@ -51,37 +47,39 @@ function runGame2(bingoNumbers, _boards) {
 }
 
 function updateBoards(boards, bingoNumber) {
-    boards.forEach(board => {
-        board.map(row => {
-            const index = row.findIndex((n) => bingoNumber === n);
-            if (index >= 0) {
-                row[index] = 'x';
-            }
+    return boards.map(board => {
+        return board.map(row => {
+            return row.map(n => {
+                return bingoNumber === n ? 'x' : n;
+            });
         });
     });
 }
 
+// Find boards that have won
 function findWinners(boards) {
     return boards.filter(curr => {
-        const rows = checkRows(curr)
-        const columns = checkColumns(curr);
+        const rows = findBingoRow(curr)
+        const columns = findBingoColumns(curr);
         return rows.length > 0 || columns.length > 0
     });
 }
 
+// Find boards that have not yet won
 function findInPlay(boards) {
     return boards.filter(curr => {
-        const rows = checkRows(curr)
-        const columns = checkColumns(curr);
+        const rows = findBingoRow(curr)
+        const columns = findBingoColumns(curr);
         return rows.length === 0 && columns.length === 0
     });
 }
 
-function checkRows(b) {
+function findBingoRow(b) {
     return b.filter(row => row.join('') === 'xxxxx');
 }
 
-function checkColumns(b) {
+// Create arrays of all columns and check for winning columns
+function findBingoColumns(b) {
     const columns = b.reduce((columns, row) => {
         for (let i = 0; i < row.length; i++) {
             if (columns[i]) {
@@ -93,7 +91,14 @@ function checkColumns(b) {
         return columns;
     }, []);
 
-    return checkRows(columns);
+    return findBingoRow(columns);
+}
+
+function createBoards(data) {
+    return data.map((d) => {
+        const boardLines = d.split(/\r?\n/);
+        return createBoard(boardLines);
+    });
 }
 
 function createBoard(boardLines) {
