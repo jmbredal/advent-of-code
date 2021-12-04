@@ -6,6 +6,13 @@ export function readLines(filename, removeEmptyLines=true) {
   const lines = file.split(splitChar);
   return removeEmptyLines ? lines.filter(x => x) : lines;
 }
+
+export function splitFileLinebreak(filename) {
+  const file = fs.readFileSync(filename).toString();
+  const splitChar = getLineBreakChar(file);
+  return file.split(/\r?\n\r?\n/);
+}
+
 function getLineBreakChar(string) {
   const indexOfLF = string.indexOf('\n', 1);  // No need to check first-character
 
