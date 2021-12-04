@@ -34,8 +34,9 @@ function runGame2(bingoNumbers, _boards) {
     for (let i = 0; i < bingoNumbers.length; i++) {
         const bingoNumber = bingoNumbers[i];
         boards = updateBoards(boards, bingoNumber);
-
         const winners = findWinners(boards);
+
+        // Remember last winners and update remaining boards
         if (winners.length > 0) {
             lastNumber = bingoNumber;
             lastWinners = [...winners];
@@ -46,6 +47,7 @@ function runGame2(bingoNumbers, _boards) {
     return calculateScore(lastNumber, lastWinners[0]);
 }
 
+// Mark bingonumber with an x
 function updateBoards(boards, bingoNumber) {
     return boards.map(board => {
         return board.map(row => {
@@ -115,4 +117,3 @@ function calculateScore(calledNumber, board) {
 
     return calledNumber * boardSum;
 }
-
