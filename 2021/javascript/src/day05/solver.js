@@ -1,51 +1,28 @@
 import { readLines } from '../common.js';
 
-// solve2('./testdata');
-solve1('./input');
-solve2('./input');
-
-function solve1(filename) {
+export function solve(filename) {
     const data = readLines(filename);
     const coords = data.map((line) => getCoordinates(line));
-    // filter out diagonal lines
-    const notDiagonal = coords.filter(c => {
-        // [ 6, 4 ], [ 2, 0 ]
-        const [to, from] = c;
-        return from[0] === to[0] || from[1] === to[1];
-    });
 
-    const horizontalPoints = getHorizontalPoints(notDiagonal);
-    const verticalPoints = getVerticalPoints(notDiagonal);
+    const horizontalPoints = getHorizontalPoints(coords);
+    const verticalPoints = getVerticalPoints(coords);
     const pointsToMark = horizontalPoints.concat(verticalPoints);
     const map = createMap(coords, pointsToMark);
 
-    console.log(findOverlap(map));
+    return findOverlap(map);
 }
 
-function solve2(filename) {
+export function solve2(filename) {
     const data = readLines(filename);
     const coords = data.map((line) => getCoordinates(line));
-    // filter out diagonal lines
-    const notDiagonal = coords.filter(c => {
-        // [ 6, 4 ], [ 2, 0 ]
-        const [to, from] = c;
-        return from[0] === to[0] || from[1] === to[1];
-    });
-    
-    const diagonal = coords.filter(c => {
-        // [ 6, 4 ], [ 2, 0 ]
-        const [to, from] = c;
-        return from[0] !== to[0] && from[1] !== to[1];
-    });
-    
-    const horizontalPoints = getHorizontalPoints(notDiagonal);
-    const verticalPoints = getVerticalPoints(notDiagonal);
-    const diagonalPoints = getDiagonalPoints(diagonal);
+
+    const horizontalPoints = getHorizontalPoints(coords);
+    const verticalPoints = getVerticalPoints(coords);
+    const diagonalPoints = getDiagonalPoints(coords);
     const pointsToMark = horizontalPoints.concat(verticalPoints, diagonalPoints);
     const map = createMap(coords, pointsToMark);
 
-    console.log(findOverlap(map));
-
+    return findOverlap(map);
 }
 
 function createMap(allPoints, pointsToMark) {
@@ -86,8 +63,8 @@ function getCoordinates(line) {
     return [[fromX, fromY], [toX, toY]];
 }
 
-function getHorizontalPoints(points, map) {
-    const horizontal = points.filter((p) => {
+function getHorizontalPoints(coords) {
+    const horizontal = coords.filter((p) => {
         const [from, to] = p;
         return from[1] === to[1];
     }).map((p) => {
@@ -106,8 +83,8 @@ function getHorizontalPoints(points, map) {
     }, []);
 }
 
-function getVerticalPoints(points) {
-    const vertical = points.filter((p) => {
+function getVerticalPoints(coords) {
+    const vertical = coords.filter((p) => {
         const [from, to] = p;
         return from[0] === to[0];
     }).map(p => {
@@ -125,13 +102,16 @@ function getVerticalPoints(points) {
     }, []);
 }
 
-function getDiagonalPoints(diagonalPoints) {
-    const points = diagonalPoints.map(p => {
+function getDiagonalPoints(coords) {
+    const diagonal = coords.filter((p) => {
+        const [from, to] = p;
+        return from[0] !== to[0] && from[1] !== to[1];
+    }).map(p => {
         const [from, to] = p;
         return from[0] > to[0] ? [to, from] : p;
     });
 
-    return points.reduce((points, point) => {
+    return diagonal.reduce((points, point) => {
         const [from, to] = point;
         if (from[1] < to[1]) {
             // mark downwards
