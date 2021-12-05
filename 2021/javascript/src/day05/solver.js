@@ -1,9 +1,10 @@
 import { readLines } from '../common.js';
 
 // solve2('./testdata');
+solve1('./input');
 solve2('./input');
 
-function solve(filename) {
+function solve1(filename) {
     const data = readLines(filename);
     const coords = data.map((line) => getCoordinates(line));
     // filter out diagonal lines
@@ -13,9 +14,10 @@ function solve(filename) {
         return from[0] === to[0] || from[1] === to[1];
     });
 
-    let map = createMap(notDiagonal);
-    markHorizontal(notDiagonal, map);
-    markVertical(notDiagonal, map);
+    const horizontalPoints = getHorizontalPoints(notDiagonal);
+    const verticalPoints = getVerticalPoints(notDiagonal);
+    const pointsToMark = horizontalPoints.concat(verticalPoints);
+    const map = createMap(coords, pointsToMark);
 
     console.log(findOverlap(map));
 }
@@ -36,22 +38,27 @@ function solve2(filename) {
         return from[0] !== to[0] && from[1] !== to[1];
     });
     
-
-    let map = createMap(notDiagonal);
-    markHorizontal(notDiagonal, map);
-    markVertical(notDiagonal, map);
-    markDiagonal(diagonal, map);
+    const horizontalPoints = getHorizontalPoints(notDiagonal);
+    const verticalPoints = getVerticalPoints(notDiagonal);
+    const diagonalPoints = getDiagonalPoints(diagonal);
+    const pointsToMark = horizontalPoints.concat(verticalPoints, diagonalPoints);
+    const map = createMap(coords, pointsToMark);
 
     console.log(findOverlap(map));
 
 }
 
-function createMap(data) {
-    const [maxX, maxY] = findMax(data);
+function createMap(allPoints, pointsToMark) {
+    const [maxX, maxY] = findMax(allPoints);
     const map = [];
-    for (let x = 0; x <= maxX; x++) {
+    for (let y = 0; y <= maxY; y++) {
         map.push(Array(maxX + 1).fill(0));
     }
+
+    pointsToMark.forEach((p) => {
+        const [x, y] = p;
+        map[y][x]++;
+    });
     return map;
 }
 
@@ -79,7 +86,7 @@ function getCoordinates(line) {
     return [[fromX, fromY], [toX, toY]];
 }
 
-function markHorizontal(points, map) {
+function getHorizontalPoints(points, map) {
     const horizontal = points.filter((p) => {
         const [from, to] = p;
         return from[1] === to[1];
@@ -89,18 +96,17 @@ function markHorizontal(points, map) {
         return from[0] > to[0] ? [to, from] : p;
     });
 
-    horizontal.forEach(p => {
-        const [from, to] = p;
+    return horizontal.reduce((points, point) => {
+        const [from, to] = point;
         const y = from[1];
         for (let x = from[0]; x <= to[0]; x++) {
-            map[y][x]++;
+            points.push([x, y]);
         }
-    });
-
-    return map;
+        return points;
+    }, []);
 }
 
-function markVertical(points, map) {
+function getVerticalPoints(points) {
     const vertical = points.filter((p) => {
         const [from, to] = p;
         return from[0] === to[0];
@@ -109,42 +115,41 @@ function markVertical(points, map) {
         return from[1] > to[1] ? [to, from] : p;
     });
 
-    vertical.forEach(p => {
-        const [from, to] = p;
+    return vertical.reduce((points, point) => {
+        const [from, to] = point;
         const x = from[0];
         for (let y = from[1]; y <= to[1]; y++) {
-            map[y][x]++;
+            points.push([x, y]);
         }
-    });
-
-    return map;
+        return points;
+    }, []);
 }
 
-function markDiagonal(_points, map) {
-    const points = _points.map(p => {
+function getDiagonalPoints(diagonalPoints) {
+    const points = diagonalPoints.map(p => {
         const [from, to] = p;
         return from[0] > to[0] ? [to, from] : p;
     });
 
-    points.forEach((p) => {
-        const [from, to] = p;
+    return points.reduce((points, point) => {
+        const [from, to] = point;
         if (from[1] < to[1]) {
             // mark downwards
             let y = from[1];
             for (let x = from[0]; x <= to[0]; x++) {
-                map[y][x]++;
+                points.push([x, y]);
                 y++;
             }
         } else {
             // mark upwards
             let y = from[1];
             for (let x = from[0]; x <= to[0]; x++) {
-                map[y][x]++;
+                points.push([x, y]);
                 y--;
             }
         }
-    });
-    return map;
+        return points;
+    }, []);
 }
 
 function findOverlap(map) {
