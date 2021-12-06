@@ -1,5 +1,5 @@
 ﻿using System;
-using Day03;
+using Solvers;
 
 namespace AdventOfCode
 {
@@ -8,7 +8,7 @@ namespace AdventOfCode
         static void Main(string[] args)
         {
             Console.WriteLine("Running solver");
-            new Day03Solver();
+            new Day04Solver();
         }
     }
 }
