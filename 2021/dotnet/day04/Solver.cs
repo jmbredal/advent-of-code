@@ -58,7 +58,7 @@ namespace Solvers
             SolveTask1(TestData);
             SolveTask1(RealData);
             SolveTask2(TestData);
-            // SolveTask2(RealData);
+            SolveTask2(RealData);
         }
 
         public static List<string> ParseFile(string filename, bool unixStyle=false)
@@ -70,17 +70,21 @@ namespace Solvers
             }
         }
 
-        public void SolveTask1(List<string> data)
+        private List<Card> GetCards(IEnumerable<string> rest)
         {
-            var numbers = data.First().Split(',').Select(c => Int32.Parse(c)).ToList();
-            var rest = data.Skip(2);
-
             var cards = new List<Card>();
             while (rest.Count() >= 5 ) {
                 var cardLines = rest.Take(5);
                 cards.Add(new Card(cardLines));
                 rest = rest.Skip(6);
             }
+            return cards;
+        }
+
+        public void SolveTask1(List<string> data)
+        {
+            var numbers = data.First().Split(',').Select(c => Int32.Parse(c)).ToList();
+            var cards = GetCards(data.Skip(2));
 
             for (int i = 0; i < numbers.Count(); i++)
             {
@@ -97,7 +101,26 @@ namespace Solvers
 
         public void SolveTask2(List<string> data)
         {
-            Console.WriteLine("Task 2: {0}");
+            var numbers = data.First().Split(',').Select(c => Int32.Parse(c)).ToList();
+            var cards = GetCards(data.Skip(2));
+
+            var rest = new List<Card>(cards);
+            var lastWinners = new List<Card>();
+            var lastNumber = 0;
+            for (int i = 0; i < numbers.Count(); i++)
+            {
+                var number = numbers[i];
+                rest.ForEach(c => c.Update(number));
+
+                if (rest.Any(c => c.HasBingo()))
+                {
+                    lastWinners = new List<Card>(rest.Where(c => c.HasBingo()));
+                    lastNumber = number;
+                }
+                rest = new List<Card>(rest.Where(c => !c.HasBingo()));
+            }
+            var lastWinner = lastWinners[0];
+            Console.WriteLine("Task 2: {0}", lastWinner.Sum() * lastNumber);
         }
     }
 }
