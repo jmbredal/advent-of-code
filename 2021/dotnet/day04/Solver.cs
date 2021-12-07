@@ -7,39 +7,41 @@ namespace Solvers
 {
     class Card
     {
-        public List<int[]> Rows { get; set; }
-        public List<int[]> Columns {
-            get {
-                var columns = new List<int[]>();
-                for (var i = 0; i < 5; i++)
-                {
-                    var column = Rows.Select(r => r[i]).ToArray();
-                    columns.Add(column);
-                }
-                return columns;
-            }
-        }
+        public List<string[]> Rows { get; set; }
         
         public Card(IEnumerable<string> lines) {
             Rows = lines.Select(line => {
-                var row = line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(cell => Int32.Parse(cell)).ToArray();
+                var row = line.Split(" ", StringSplitOptions.RemoveEmptyEntries).ToArray();
                 return row;
             }).ToList();
         }
 
         public void Update(int number)
         {
-            Rows = Rows.Select(row => row.Select(n => n == number ? 0 : n).ToArray()).ToList();
+            Rows = Rows.Select(row => row.Select(n => {
+                return n == "x" ? "x" : Int32.Parse(n) == number ? "x" : n;
+            }).ToArray()).ToList();
         }
 
         public bool HasBingo()
         {
-            return Rows.Any(row => row.Sum() == 0) || Columns.Any(column => column.Sum() == 0);
+            return Rows.Any(row => row.Count(x => x == "x") == 5) || GetColumns().Any(column => column.Count(x => x == "x") == 5);
+        }
+
+        private List<string[]> GetColumns()
+        {
+            var columns = new List<string[]>();
+            for (var i = 0; i < 5; i++)
+            {
+                var column = Rows.Select(r => r[i]).ToArray();
+                columns.Add(column);
+            }
+            return columns;
         }
 
         public int Sum()
         {
-            return Rows.Select(r => r.Sum()).Sum();
+            return Rows.Select(r => r.Where(c => c != "x").Sum(c => Int32.Parse(c))).Sum();
         }
     }
 
@@ -55,7 +57,7 @@ namespace Solvers
 
             SolveTask1(TestData);
             SolveTask1(RealData);
-            // SolveTask2(TestData);
+            SolveTask2(TestData);
             // SolveTask2(RealData);
         }
 
