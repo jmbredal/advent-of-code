@@ -8,7 +8,7 @@ namespace AdventOfCode
         static void Main(string[] args)
         {
             Console.WriteLine("Running solver");
-            new Day04Solver();
+            new Day07Solver();
         }
     }
 }
