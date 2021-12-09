@@ -22,10 +22,9 @@ function findLowPoints(lines) {
 }
 
 function findLowpointsOnLine(line, lineNumber, lines) {
-  const numbers = line.split('');
+  const numbers = line.split('').map(Number);
   return numbers.filter((number, index) => {
     const neighbours = [];
-    number = +number;
 
     if (index > 0) {
       neighbours.push(numbers[index - 1]);
@@ -36,11 +35,11 @@ function findLowpointsOnLine(line, lineNumber, lines) {
     }
 
     if (lineNumber > 0) {
-      neighbours.push(lines[lineNumber - 1][index]);
+      neighbours.push(+lines[lineNumber - 1][index]);
     }
 
     if (lineNumber < lines.length - 1) {
-      neighbours.push(lines[lineNumber + 1][index]);
+      neighbours.push(+lines[lineNumber + 1][index]);
     }
     const isLowest = neighbours.filter((n) => +n <= number).length === 0;
     return isLowest;
