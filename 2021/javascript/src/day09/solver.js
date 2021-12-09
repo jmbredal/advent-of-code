@@ -92,6 +92,7 @@ function findBasinSize(map, x, y) {
   return findSlopes(map, x, y).length;
 }
 
+// Recursive function for climbing a slope
 export function findSlopes(map, x, y) {
   const neighbours = findNeighbours(x, y, map);
   const toVisit = getCandidates(neighbours, map, x, y);
