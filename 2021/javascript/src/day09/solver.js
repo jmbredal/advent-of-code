@@ -1,47 +1,122 @@
 import { readLines } from '../common.js';
 
-// solve('testdata');
-// solve('input');
-
 export function solve(filename) {
   const lines = readLines(filename);
-  const lowPoints = findLowPoints(lines);
-  const riskLevels = lowPoints.map(p => +p + 1);
+  const map = createMap(lines);
+  const lowPoints = findLowPoints(map);
+  const lowPointValues = findLowPointValues(lowPoints, map);
+  const riskLevels = lowPointValues.map(p => +p + 1);
   const sum = riskLevels.reduce((a, b) => a + b);
   return sum;
 }
 
-export function solve2() {
-  return 'Not implemented'
+export function solve2(filename) {
+  const lines = readLines(filename);
+  const map = createMap(lines);
+  const lowPoints = findLowPoints(map);
+  const basins = findBasinSizes(lowPoints, map);
+
+  // find the three largest
+  const product = basins.sort((x, y) => y - x).slice(0, 3).reduce((a, b) => a * b);
+  return product
 }
 
-function findLowPoints(lines) {
-  return lines
-    .map((line, lineNumber) => findLowpointsOnLine(line, lineNumber, lines))
-    .reduce((acc, curr) => acc.concat(curr), []);  // concat arrays
+function createMap(lines) {
+  return lines.map((line) => line.split('').map(Number));
 }
 
-function findLowpointsOnLine(line, lineNumber, lines) {
-  const numbers = line.split('').map(Number);
-  return numbers.filter((number, index) => {
-    const neighbours = [];
-
-    if (index > 0) {
-      neighbours.push(numbers[index - 1]);
-    }
-
-    if (index < numbers.length - 1) {
-      neighbours.push(numbers[index + 1]);
-    }
-
-    if (lineNumber > 0) {
-      neighbours.push(+lines[lineNumber - 1][index]);
-    }
-
-    if (lineNumber < lines.length - 1) {
-      neighbours.push(+lines[lineNumber + 1][index]);
-    }
-    const isLowest = neighbours.filter((n) => +n <= number).length === 0;
-    return isLowest;
+function findLowPointValues(lowPoints, map) {
+  return lowPoints.map(point => {
+    const [x, y] = point;
+    return map[y][x];
   });
+}
+
+function findLowPoints(map) {
+  return map.map((row, rowNumber) => {
+    return row.map((pointValue, index) => {
+      const neighbors = findNeighbours(index, rowNumber, map);
+      const isLowest = neighbors.filter(n => {
+        const [x, y] = n;
+        return map[y][x] <= pointValue;
+      }).length === 0;
+
+      if (isLowest) {
+        return [index, rowNumber];
+      }
+      return [];
+    }).filter(x => x.length > 0);
+  }).filter(x => x.length > 0).flat();
+}
+
+function findBasinSizes(lowPoints, map) {
+  return lowPoints.map((point) => {
+    const [x, y] = point;
+    return findBasinSize(map, x, y);
+  })
+}
+
+export function findNeighbours(x, y, map) {
+  const neighbours = [];
+  const height = map.length;
+  const width = map[0].length;
+
+  if (x > 0) {
+    neighbours.push([x - 1, y]);
+  }
+
+  if (x < width - 1) {
+    neighbours.push([x + 1, y]);
+  }
+
+  if (y > 0) {
+    neighbours.push([x, y - 1]);
+  }
+
+  if (y < height - 1) {
+    neighbours.push([x, y + 1]);
+  }
+
+  return neighbours;
+}
+
+function findBasinSize(map, x, y) {
+  return findSlopes(map, x, y).length;
+}
+
+export function findSlopes(map, x, y) {
+  const neighbours = findNeighbours(x, y, map);
+  const toVisit = getCandidates(neighbours, map, x, y);
+
+  let visitedPoints = [[x, y]];
+  toVisit.map(s => {
+    const [x, y] = s;
+    const vt = findSlopes(map, x, y);
+    visitedPoints = visitedPoints.concat(vt);
+  });
+
+  return removeDuplicates(visitedPoints);
+}
+
+function removeDuplicates(points) {
+  const hash = [];
+  return points.reduce((acc, curr) => {
+    const point = JSON.stringify(curr);
+    if (!hash.includes(point)) {
+      hash.push(point);
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+}
+
+export function getCandidates(neighbours, map, x, y) {
+  // Remove neighbours that are tops (value == 9) and that are lower
+  return neighbours
+    .filter(n => {
+      const [nX, nY] = n;
+      const isPeak = map[nY][nX] === 9
+      const isTaller = map[nY][nX] > map[y][x];
+      return isTaller && !isPeak;
+    });
 }
