@@ -33,27 +33,28 @@ function findLowPointValues(lowPoints, map) {
 }
 
 function findLowPoints(map) {
-  return map.map((row, rowNumber) => {
-    return row.map((pointValue, index) => {
-      const neighbors = findNeighbours(index, rowNumber, map);
-      const isLowest = neighbors.filter(n => {
-        const [x, y] = n;
-        return map[y][x] <= pointValue;
-      }).length === 0;
-
-      if (isLowest) {
-        return [index, rowNumber];
-      }
-      return [];
-    }).filter(x => x.length > 0);
-  }).filter(x => x.length > 0).flat();
+  return map.reduce((result, row, rowNumber) => {
+    const lowestPointsInRow = findLowestPointsInRow(row, rowNumber, map);
+    return result.concat(lowestPointsInRow);
+  }, []);
 }
 
-function findBasinSizes(lowPoints, map) {
-  return lowPoints.map((point) => {
-    const [x, y] = point;
-    return findBasinSize(map, x, y);
-  })
+function findLowestPointsInRow(row, rowNumber, map) {
+  return row.reduce((acc, pointValue, index) => {
+    if (isLowestPoint(index, rowNumber, map)) {
+      acc.push([index, rowNumber]);
+    }
+    return acc;
+  }, []);
+}
+
+function isLowestPoint(x, y, map) {
+  const neighbors = findNeighbours(x, y, map);
+  const pointValue = map[y][x];
+  return neighbors.filter(n => {
+    const [nX, nY] = n;
+    return map[nY][nX] <= pointValue;
+  }).length === 0;
 }
 
 export function findNeighbours(x, y, map) {
@@ -78,6 +79,13 @@ export function findNeighbours(x, y, map) {
   }
 
   return neighbours;
+}
+
+function findBasinSizes(lowPoints, map) {
+  return lowPoints.map((point) => {
+    const [x, y] = point;
+    return findBasinSize(map, x, y);
+  })
 }
 
 function findBasinSize(map, x, y) {
