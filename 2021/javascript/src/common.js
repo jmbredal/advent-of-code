@@ -1,5 +1,9 @@
 import fs from 'fs';
 
+Array.prototype.sum = function() {
+  return this.reduce((a, b) => a + b);
+}
+
 export function readLines(filename, removeEmptyLines=true) {
   const file = fs.readFileSync(filename).toString();
   const splitChar = getLineBreakChar(file);
