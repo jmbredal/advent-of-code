@@ -4,6 +4,10 @@ Array.prototype.sum = function() {
   return this.reduce((a, b) => a + b);
 }
 
+Array.prototype.sortNumerically = function() {
+  return this.sort((a, b) => a - b);
+}
+
 export function readLines(filename, removeEmptyLines=true) {
   const file = fs.readFileSync(filename).toString();
   const splitChar = getLineBreakChar(file);
