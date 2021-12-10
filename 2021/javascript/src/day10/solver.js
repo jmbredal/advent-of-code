@@ -1,7 +1,7 @@
 import { readLines } from '../common.js';
 
 const startingChars = ['(', '<', '[', '{'];
-const endingChars = [')', '>', ']', '}'];
+const closingChars = [')', '>', ']', '}'];
 const points = {
   ')': 3,
   ']': 57,
@@ -18,73 +18,71 @@ const incompletePoints = {
 
 export function solve(filename) {
   const lines = readLines(filename);
-  const syntaxErrors = lines.map(l => parse(l));
+  const syntaxErrors = lines.map(l => findErrors(l));
   const sum = syntaxErrors.filter(x => x).map(char => points[char]).sum();
   return sum;
 }
 
 export function solve2(filename) {
   const lines = readLines(filename);
-  const incomplete = lines.filter(l => !parse(l));
-  const scores = incomplete.map(i => findScore(i));
-  scores.sort((a, b) => a - b);
+  const incompleteLines = lines.filter(l => !findErrors(l));
+  const scores = incompleteLines.map(i => findScore(i)).sortNumerically();
   return scores[Math.floor(scores.length / 2)];
 }
 
-function parse(line) {
-  const chars = line.split('');
+function findErrors(line) {
   const stack = [];
 
-  for (let i = 0; i < chars.length; i++) {
-    const char = chars[i];
+  for (const char of line) {
     if (startingChars.includes(char)) {
       stack.push(char);
-    }
-
-    if (endingChars.includes(char)) {
-      if (isPair(stack[stack.length - 1], char)) {
+    } else {
+      const topOfStack = stack[stack.length - 1];
+      if (isPair(topOfStack, char)) {
         // Found pair
         stack.pop();
       } else {
-        // wrong char
+        // wrong char, return error
         return char;
       }
     }
   }
+
+  // returns undefined if no errors or incomplete
 }
+
 function findScore(line) {
-  const chars = line.split('');
   const stack = [];
 
-  for (let i = 0; i < chars.length; i++) {
-    const char = chars[i];
+  for (const char of line) {
     if (startingChars.includes(char)) {
       stack.push(char);
-    }
-
-    if (endingChars.includes(char)) {
-      if (isPair(stack[stack.length - 1], char)) {
-        // Found pair
+    } else {
+      // This must be a closing char
+      const topOfStack = stack[stack.length - 1];
+      if (isPair(topOfStack, char)) {
         stack.pop();
       }
     }
   }
 
-  const score = stack.reverse().reduce((acc, curr) => {
-    const char = getPair(curr);
-    const value = incompletePoints[char];
-    acc *= 5;
-    acc += value;
-    return acc;
-  }, 0)
+  return calculateScore(stack);
+}
 
-  return score;
+function calculateScore(stack) {
+  return stack.reverse().reduce((score, startingChar) => {
+    const closingChar = getMatchingChar(startingChar);
+    const charValue = incompletePoints[closingChar];
+    score *= 5;
+    score += charValue;
+    return score;
+  }, 0);
 }
 
 function isPair(char1, char2) {
-  return startingChars.indexOf(char1) === endingChars.indexOf(char2);
+  return startingChars.indexOf(char1) === closingChars.indexOf(char2);
 }
 
-function getPair(char) {
-  return endingChars[startingChars.indexOf(char)];
+function getMatchingChar(char) {
+  return closingChars[startingChars.indexOf(char)];
 }
