@@ -1,7 +1,5 @@
 import { readLines } from '../common.js';
 
-// solve('testdata');
-
 export function solve(filename) {
     const lines = readLines(filename);
     
@@ -9,12 +7,7 @@ export function solve(filename) {
     let counter = 0;
     for (let count = 0; count < 100; count++) {
         map = increaseAllEnergyLevels(map);
-        let flashingCells = [getFlashingCells(map)];
-        while (flashingCells.length > 0) {
-            flashingCells = getFlashingCells(map);
-            counter += flashingCells.length;
-            flashAll(flashingCells, map);
-        }
+        counter += flashAll(getFlashingCells(map), map);
     }
 
     return counter;
@@ -24,17 +17,15 @@ export function solve2(filename) {
     const lines = readLines(filename);
     
     let map = createMap(lines);
-    for (let count = 0; count < 1000; count++) {
+    let counter = 0;
+    let allFlashing = false;
+    while (!allFlashing && counter < 10000) {
         map = increaseAllEnergyLevels(map);
-        let flashingCells = [getFlashingCells(map)];
-        while (flashingCells.length > 0) {
-            flashingCells = getFlashingCells(map);
-            flashAll(flashingCells, map);
-        }
-        if (isAllFlashing(map)) {
-            return count + 1;
-        }
+        flashAll(getFlashingCells(map), map);
+        allFlashing = isAllFlashing(map);
+        counter++;
     }
+    return counter;
 }
 
 function isAllFlashing(map) {
@@ -85,7 +76,14 @@ function getFlashingCells(map) {
 }
 
 function flashAll(flashingCells, map) {
+    let counter = flashingCells.length;
     flashingCells.forEach(cell => flashCell(cell, map));
+    
+    const newFlashingCells = getFlashingCells(map);
+    if (newFlashingCells.length > 0) {
+        counter += flashAll(newFlashingCells, map);
+    }
+    return counter;
 }
 
 function flashCell(cell, map) {
