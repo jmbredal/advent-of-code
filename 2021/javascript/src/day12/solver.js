@@ -4,22 +4,20 @@ export function solve(filename) {
     const lines = readLines(filename);
     const nodes = createNodes(lines);
 
-    let counter = [0];
-    explore('start', nodes, {}, counter)
-    return counter[0];
+    let counter = 0;
+    return explore('start', nodes, {}, counter)
 }
 
 export function solve2(filename) {
     const lines = readLines(filename);
     const nodes = createNodes(lines);
 
-    let counter = [0];
+    let counter = 0;
     const visited = Object.keys(nodes).reduce((acc, curr) => {
         acc[curr] = 0;
         return acc;
     }, {});
-    explore2('start', nodes, visited, counter, false)
-    return counter[0];
+    return explore2('start', nodes, visited, counter, false)
 }
 
 function createNodes(lines) {
@@ -45,17 +43,18 @@ function explore(node, nodes, visited, counter) {
     visited[node] = true;
 
     if (node === 'end') {
-        counter[0]++;
+        counter++;
     } else {
         for (const target of nodes[node]) {
             const isBig = target === target.toUpperCase();
             if (!visited[target] || isBig) {
-                explore(target, nodes, visited, counter);
+                counter = explore(target, nodes, visited, counter);
             }
         }
     }
 
     visited[node] = false;
+    return counter;
 }
 
 function explore2(node, nodes, visited, counter, hasVisitedSmallCaveTwice) {
@@ -68,7 +67,7 @@ function explore2(node, nodes, visited, counter, hasVisitedSmallCaveTwice) {
     }
 
     if (node === 'end') {
-        counter[0]++;
+        counter++;
     } else {
         for (const target of nodes[node]) {
             const isBig = target === target.toUpperCase();
@@ -77,14 +76,15 @@ function explore2(node, nodes, visited, counter, hasVisitedSmallCaveTwice) {
             if (target === 'start') { continue }
 
             const hasNotVisited = visited[target] < 1;
-            const hasVisitedButIsFirstSmallCave = isSmall && !hasVisitedSmallCaveTwice && visited[target] < 2;
+            const hasVisitedButIsFirstSmallCave = isSmall && !hasVisitedSmallCaveTwice && visited[target] === 1;
             const shouldExplore = isBig || hasNotVisited || hasVisitedButIsFirstSmallCave;
 
             if (shouldExplore) {
-                explore2(target, nodes, visited, counter, hasVisitedSmallCaveTwice);
+                counter = explore2(target, nodes, visited, counter, hasVisitedSmallCaveTwice);
             }
         }
     }
 
     visited[node]--;
+    return counter;
 }
