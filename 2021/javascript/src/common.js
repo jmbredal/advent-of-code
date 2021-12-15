@@ -8,6 +8,10 @@ Array.prototype.sortNumerically = function () {
   return this.sort((a, b) => a - b);
 }
 
+export function range(x) {
+  return [...Array(x).keys()];
+}
+
 export function readLines(filename, removeEmptyLines = true) {
   const file = fs.readFileSync(filename).toString();
   const splitChar = getLineBreakChar(file);
