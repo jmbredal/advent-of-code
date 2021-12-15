@@ -1,6 +1,9 @@
+import { readLines } from '../common.js';
 
-export function solve(data) {
-  return data.map(x => +x).reduce((acc, curr, index) => {
+export function solve(filename) {
+  const data = readLines(filename).map(Number);
+
+  return data.reduce((acc, curr, index) => {
     if (index === 0) return acc;
 
     if (curr > data[index - 1]) acc++;
@@ -8,8 +11,9 @@ export function solve(data) {
   }, 0);
 }
 
-export function solve2(_data) {
-  const data = _data.map(x => +x);
+export function solve2(filename) {
+  const data = readLines(filename).map(Number);
+
   let counter = 0;
   for (let i=3; i <= data.length - 1; i++) {
     const start = i - 3;

@@ -1,4 +1,8 @@
-export function solve(data) {
+import { readLines } from '../common.js';
+
+export function solve(filename) {
+  const data = readLines(filename);
+
   const position = data.reduce((position, line) => {
     let [action, value] = line.split(' ');
     value = +value;
@@ -20,7 +24,8 @@ export function solve(data) {
   return position.horizontal * position.depth;
 }
 
-export function solve2(data) {
+export function solve2(filename) {
+  const data = readLines(filename);
   const position = data.reduce((position, line) => {
     let [action, value] = line.split(' ');
     value = +value;
