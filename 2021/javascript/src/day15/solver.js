@@ -3,7 +3,7 @@ import { readLines, getNeighbors, createMap, range } from '../common.js';
 export function solve(filename) {
   const lines = readLines(filename);
   const valueMap = createMap(lines);
-  const distanceMap = lines.map(line => {
+  const distanceMap = valueMap.map(line => {
     return Array.from(line).fill(999999999);
   })
 
@@ -18,7 +18,7 @@ export function solve(filename) {
 
 export function solve2(filename) {
   const lines = readLines(filename);
-  const valueMap = createBigMap(lines);
+  const valueMap = createBigMap(createMap(lines));
   const distanceMap = valueMap.map(line => {
     return Array.from(line).fill(999999999);
   })
@@ -36,23 +36,22 @@ function createCell(x, y, distance) {
   return { x, y, distance };
 }
 
-function createBigMap(lines) {
-  const map = duplicateHorizontally(lines, 4);
-  return duplicateVertically(map, 4);
+export function createBigMap(map) {
+  const bigMap = duplicateHorizontally(map, 5);
+  return duplicateVertically(bigMap, 5);
 }
 
-function duplicateHorizontally(map, times) {
-  return map.map(line => {
-    const numbers = line.split('').map(Number);
-    return range(times - 1).reduce((acc, curr) => {
-      const duplicate = addToLine(numbers, curr);
+export function duplicateHorizontally(map, times) {
+  return map.map(row => {
+    return range(times).reduce((acc, curr) => {
+      const duplicate = addToLine(row, curr);
       return acc.concat(duplicate);
     }, []);
   });
 }
 
-function duplicateVertically(map, times) {
-  return range(times).reduce((acc, index) => {
+export function duplicateVertically(map, times) {
+  return range(times - 1).reduce((acc, index) => {
     const duplicate = map.map(line => addToLine(line, index + 1));
     return acc.concat(duplicate);
   }, [...map]);

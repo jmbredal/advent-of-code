@@ -8,10 +8,18 @@ Array.prototype.sortNumerically = function () {
   return this.sort((a, b) => a - b);
 }
 
+// range(5) => [0, 1, 2, 3, 4]
 export function range(x) {
   return [...Array(x).keys()];
 }
 
+export function zip(array1, array2) {
+  return array1.map((a, index) => [a, array2[index]]);
+}
+
+// Reads lines from a file
+// checking for linebreakchar
+// option for removing empty lines
 export function readLines(filename, removeEmptyLines = true) {
   const file = fs.readFileSync(filename).toString();
   const splitChar = getLineBreakChar(file);
@@ -19,6 +27,7 @@ export function readLines(filename, removeEmptyLines = true) {
   return removeEmptyLines ? lines.filter(x => x) : lines;
 }
 
+// Splits file on linebreaks
 export function splitFileLinebreak(filename) {
   const file = fs.readFileSync(filename).toString();
   const splitChar = getLineBreakChar(file);

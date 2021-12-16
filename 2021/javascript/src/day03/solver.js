@@ -1,4 +1,8 @@
-export function solve(data) {
+import { readLines } from '../common.js';
+
+export function solve(filename) {
+  const data = readLines(filename);
+
   const bitArrays = createBitArrays(data);
   const mostCommonBitsArray = getMostCommonBits(bitArrays);
   const leastBitArray = xor(mostCommonBitsArray);
@@ -11,7 +15,8 @@ export function solve(data) {
 }
 
 
-export function solve2(data) {
+export function solve2(filename) {
+  const data = readLines(filename);
   const oxygenGeneratorRating = parseInt(getRemainingBitstring(data, false), 2);
   const co2ScrubberRating = parseInt(getRemainingBitstring(data), 2);
 
