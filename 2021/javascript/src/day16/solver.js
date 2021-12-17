@@ -1,16 +1,30 @@
 import { readLines } from '../common.js';
 
 class Packet {
-  constructor(hex) {
-    this.hexArray = [];
-    this.isDone = false;
+  constructor(generator) {
+    this.generator = generator;
+
+    // Get packet version
+    this.version = this.toInt(this.getBits(3));
+    this.typeId = this.toInt(this.getBits(3));
+
+    if (this.typeId === 4) {
+      this.parseLiteral();
+    } else {
+      this.parseOperator();
+    }
   }
 
-  feed(hexValue) {
-    this.hexArray.push(hexValue);
-    const hex = this.hexArray.join('');
-    this.bits = (parseInt(hex, 16).toString(2)).padStart(4 * hex.length, '0');
-    this.parse();
+  getBits(count) {
+    const bits = [];
+    for (let index = 0; index < count; index++) {
+      bits.push(this.generator.next().value);
+    }
+    return bits.join('');
+  }
+
+  toInt(bits) {
+    return parseInt(bits, 2);
   }
 
   parse() {
@@ -28,64 +42,73 @@ class Packet {
 
       const map = {
         'literal': this.parseLiteral.bind(this),
+        'operator': this.parseOperator.bind(this),
       }
 
-      map[this.type]();
+      console.log('parsing', this.bits, this.type, this.restBits);
+
+      return map[this.type]();
     }
   }
 
   parseLiteral() {
-    this.valueBits = this.restBits.match(/.{5}/g);
-    const x = [];
-    this.valueBits.forEach(valueBit => {
-      if (+valueBit[0] === 1) {
-        x.push(valueBit.slice(1, 5));
-      }
-      if (+valueBit[0] === 0) {
-        x.push(valueBit.slice(1, 5));
-        this.value = parseInt(x.join(''), 2);
-        this.isDone = true;
-      }
-    });
+    let isLastGroup = false;
+    const groups = [];
+    while (!isLastGroup) {
+      const group = this.getBits(5);
+      groups.push(group.slice(1));
+      if (+group[0] === 0) { isLastGroup = true; }
+    }
+
+    this.value = this.toInt(groups.join(''));
+    console.log('literal value', this.value);
   }
 
-  // this.hex = hex;
+  parseOperator() {
+    this.lengthTypeId = +this.getBits(1);
 
-  // this.bits = (parseInt(hex, 16).toString(2)).padStart(4 * hex.length, '0');
-  // this.versionBits = this.bits.slice(0, 3);
-  // this.version = parseInt(this.versionBits, 2);
+    if (this.lengthTypeId === 0) {
+      if (this.restBits.length >= 15) {
+        this.subPacketLengthBits = this.restBits.slice(1, 16);
+        this.subPacketLength = parseInt(this.subPacketLengthBits, 2);
+        this.subPacketsBits = this.restBits.slice(16);
 
-  // this.typeIdBits = this.bits.slice(3, 6);
-  // this.typeNum = parseInt(this.typeIdBits, 2);
-  // this.type = this.typeNum === 4 ? 'literal' : 'operator';
+        if (this.subPacketsBits.length >= this.subPacketLength) {
+          this.subPackets = this.subPacketsBits.slice(0, this.subPacketLength);
+          if (this.subPackets.length === this.subPacketLength) {
+            // parse new packets with this.subPackets
+            this.isDone = true;
+            return this;
+          }
+        }
+      }
+      // TODO - how to split subpackets?
+    }
 
-  // this.restBits = this.bits.slice(6);
+    if (this.lengthTypeId === 1) {
+      this.subPacketCountBits = this.restBits.slice(1, 12);
+      this.subPacketCount = parseInt(this.subPacketCountBits, 2);
+      this.subPacketsBits = this.restBits.slice(12);
+      // todo - consider subPacketCount?
+      this.subPackets = this.subPacketsBits.match(/.{11}/g);
+      if (this.subPackets && this.subPackets.length === this.subPacketCount) {
+        this.isDone = true;
+        return this;
+      }
+    }
+  }
 
-  // todo: set packet size
-
-  // if (this.type === 'literal') {
-  //   this.valueBits = this.restBits.match(/.{5}/g).map(s => s.slice(1));
-  //   this.value = parseInt(this.valueBits.join(''), 2);
-  // }
-
-  // if (this.type === 'operator') {
-  //   this.lengthTypeId = +this.restBits[0];
-
-  //   if (this.lengthTypeId === 0) {
-  //     this.subPacketLengthBits = this.restBits.slice(1, 16);
-  //     this.subPacketLength = parseInt(this.subPacketLengthBits, 2);
-  //     this.subPackets = this.restBits.slice(16, 16 + this.subPacketLength);
-  //     // TODO - how to split subpackets?
-  //   }
-
-  //   if (this.lengthTypeId === 1) {
-  //     this.subPacketCountBits = this.restBits.slice(1, 12);
-  //     this.subPacketCount = parseInt(this.subPacketCountBits, 2);
-  //     this.subPacketsBits = this.restBits.slice(12);
-  //     // todo - consider subPacketCount?
-  //     this.subPackets = this.subPacketsBits.match(/.{11}/g);
-  //   }
-  // }
+  parseSubPackets() {
+    if (this.lengthTypeId === 1) {
+      console.log('parseSubPackets');
+      const packets = this.subPackets.map(bits => new Packet(bits).parse());
+      console.log(packets);
+    }
+    if (this.lengthTypeId === 0) {
+      const packet = new Packet(this.subPackets).parse();
+      console.log(packet);
+    }
+  }
 }
 
 solve('testdata');
@@ -94,27 +117,26 @@ export function solve(filename) {
   const lines = readLines(filename);
   // const hex = lines[0];
   const hex = 'D2FE280';
-
-  const packets = [];
-
-  let packet = new Packet();
-  for (const char of hex) {
-    packet.feed(char);
-
-    if (packet.isDone) {
-      console.log(packet);
-      packets.push(packet);
-      packet = new Packet();
-    }
-  }
+  // const hex = 'EE00D40C823060';
+  // const hex = '38006F45291200';
+  // const hex = '8A004A801A8002F478';
 
 
-  // console.log(new Packet('D2'));
-  // console.log(new Packet('D2FE28'));
-  // console.log(new Packet('38006F45291200'));
-  // console.log(new Packet('EE00D40C823060'));
+  const bits = (parseInt(hex, 16).toString(2)).padStart(4 * hex.length, '0');
+  console.log(bits);
+  const packet = new Packet(bitGenerator(bits));
+  console.log(packet);
 }
 
 export function solve2(filename) {
   const lines = readLines(filename);
+}
+
+function* bitGenerator(bits) {
+  let index = 0;
+  
+  while(true) {
+    yield bits[index];
+    index++;
+  }
 }
