@@ -1,12 +1,14 @@
-import { readLines } from '../common.js';
+import { range, readLines } from '../common.js';
 
 class Packet {
-  constructor(generator) {
-    this.generator = generator;
+  constructor(bits) {
+    console.log('Creating new packet');
 
     // Get packet version
     this.version = this.toInt(this.getBits(3));
     this.typeId = this.toInt(this.getBits(3));
+
+    this.subPackets = [];
 
     if (this.typeId === 4) {
       this.parseLiteral();
@@ -18,7 +20,9 @@ class Packet {
   getBits(count) {
     const bits = [];
     for (let index = 0; index < count; index++) {
-      bits.push(this.generator.next().value);
+      const { value, done } = this.generator.next();
+      if (done) throw new Error();
+      bits.push(value);
     }
     return bits.join('');
   }
@@ -52,6 +56,7 @@ class Packet {
   }
 
   parseLiteral() {
+    console.log('parseLiteral');
     let isLastGroup = false;
     const groups = [];
     while (!isLastGroup) {
@@ -61,52 +66,38 @@ class Packet {
     }
 
     this.value = this.toInt(groups.join(''));
-    console.log('literal value', this.value);
+    return this;
   }
 
   parseOperator() {
     this.lengthTypeId = +this.getBits(1);
+    console.log('parseOperator', this.lengthTypeId);
 
+    // If the length type ID is 0, then the next 15 bits are a number that represents the total length in bits of the sub-packets contained by this packet.
     if (this.lengthTypeId === 0) {
-      if (this.restBits.length >= 15) {
-        this.subPacketLengthBits = this.restBits.slice(1, 16);
-        this.subPacketLength = parseInt(this.subPacketLengthBits, 2);
-        this.subPacketsBits = this.restBits.slice(16);
-
-        if (this.subPacketsBits.length >= this.subPacketLength) {
-          this.subPackets = this.subPacketsBits.slice(0, this.subPacketLength);
-          if (this.subPackets.length === this.subPacketLength) {
-            // parse new packets with this.subPackets
-            this.isDone = true;
-            return this;
-          }
+      this.subPacketLength = this.toInt(this.getBits(15));
+      this.subPacketsBits = this.getBits(this.subPacketLength);
+      while (true) {
+        try {
+          this.subPackets.push(new Packet(this.subGenerator));
+        } catch (asd) {
+          break;
         }
       }
-      // TODO - how to split subpackets?
     }
 
+    // If the length type ID is 1, then the next 11 bits are a number that represents the number of sub-packets immediately contained by this packet.
     if (this.lengthTypeId === 1) {
-      this.subPacketCountBits = this.restBits.slice(1, 12);
-      this.subPacketCount = parseInt(this.subPacketCountBits, 2);
-      this.subPacketsBits = this.restBits.slice(12);
-      // todo - consider subPacketCount?
-      this.subPackets = this.subPacketsBits.match(/.{11}/g);
-      if (this.subPackets && this.subPackets.length === this.subPacketCount) {
-        this.isDone = true;
-        return this;
-      }
-    }
-  }
-
-  parseSubPackets() {
-    if (this.lengthTypeId === 1) {
-      console.log('parseSubPackets');
-      const packets = this.subPackets.map(bits => new Packet(bits).parse());
-      console.log(packets);
-    }
-    if (this.lengthTypeId === 0) {
-      const packet = new Packet(this.subPackets).parse();
-      console.log(packet);
+      const x = this.getBits(11);
+      console.log('x', x);
+      this.subPacketCount = this.toInt(x);
+      console.log(this.subPacketCount);
+      range(this.subPacketCount).forEach(() => {
+        const b = this.getBits(11);
+        console.log(b);
+        const g = bitGenerator(b);
+        this.subPackets.push(new Packet(g));
+      })
     }
   }
 }
@@ -116,15 +107,14 @@ solve('testdata');
 export function solve(filename) {
   const lines = readLines(filename);
   // const hex = lines[0];
-  const hex = 'D2FE280';
+  // const hex = 'D2FE280';
   // const hex = 'EE00D40C823060';
   // const hex = '38006F45291200';
-  // const hex = '8A004A801A8002F478';
+  const hex = '8A004A801A8002F478';
 
 
   const bits = (parseInt(hex, 16).toString(2)).padStart(4 * hex.length, '0');
-  console.log(bits);
-  const packet = new Packet(bitGenerator(bits));
+  const packet = new Packet(bits);
   console.log(packet);
 }
 
@@ -134,8 +124,8 @@ export function solve2(filename) {
 
 function* bitGenerator(bits) {
   let index = 0;
-  
-  while(true) {
+
+  while (index < bits.length) {
     yield bits[index];
     index++;
   }
