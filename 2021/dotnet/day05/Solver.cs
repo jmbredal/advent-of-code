@@ -52,24 +52,21 @@ namespace Solvers
 
         public void SolveTask1(List<string> data)
         {
-            var segments = data.Where(d => !isDiagonal(d)).Select(d => createLinesegment(d)).ToList();
+            var segments = data.Where(IsNotDiagonal).Select(CreateLinesegment).ToList();
             var lookup = new Dictionary<(int, int), int>();
-            var mapping = segments.Aggregate(lookup, (acc, segment) => {
-                var tuples = segment.ToList().Select(c => c.ToTuple()).ToList();
-                tuples.ForEach(t => {
-                    if (acc.ContainsKey(t)) {
-                        acc[t]++;
-                    } else {
-                        acc[t] = 1;
-                    }
-                });
-                return acc;
+            var mapping = GetTuples(segments).Aggregate(lookup, (mapping, tuple) => {
+                if (mapping.ContainsKey(tuple)) {
+                    mapping[tuple]++;
+                } else {
+                    mapping[tuple] = 1;
+                }
+                return mapping;
             });
 
             Console.WriteLine(mapping.Values.Where(v => v > 1).Count());
         }
 
-        private IEnumerable<Coords> createLinesegment(string line) {
+        private IEnumerable<Coords> CreateLinesegment(string line) {
             var pairs = line.Split(" -> ");
             var from = new Coords(pairs[0]);
             var to = new Coords(pairs[1]);
@@ -101,12 +98,19 @@ namespace Solvers
             return new List<Coords>{};
         }
 
-        private bool isDiagonal(string line) {
+        private IEnumerable<(int, int)> GetTuples(IEnumerable<IEnumerable<Coords>> segments) {
+            return segments.Aggregate(new List<(int, int)>(), (acc, segment) => {
+                acc.AddRange(segment.Select(c => c.ToTuple()));
+                return acc;
+            });
+        }
+
+        private bool IsNotDiagonal(string line) {
             var pairs = line.Split(" -> ");
             var from = new Coords(pairs[0]);
             var to = new Coords(pairs[1]);
 
-            return from.X != to.X && from.Y != to.Y;
+            return !(from.X != to.X && from.Y != to.Y);
         }
 
         public void SolveTask2(List<string> data)
