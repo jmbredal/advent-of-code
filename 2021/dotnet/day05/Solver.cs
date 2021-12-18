@@ -20,7 +20,6 @@ namespace Solvers
         public Coords(string coordString)
         {
             var coord = coordString.Split(",");
-            Console.WriteLine($"{coord[0]},{coord[1]}");
             X = Int32.Parse(coord[0]);
             Y = Int32.Parse(coord[1]);
         }
@@ -30,8 +29,8 @@ namespace Solvers
             return $"({X},{Y})";
         }
 
-        public Tuple<int, int> ToTuple() {
-            return new Tuple<int, int>(X, Y);
+        public (int X, int Y) ToTuple() {
+            return (X, Y);
         }
     }
 
@@ -53,13 +52,11 @@ namespace Solvers
 
         public void SolveTask1(List<string> data)
         {
-            // var numbers = data.First().Split(',').Select(c => Int32.Parse(c)).ToList();
             var segments = data.Where(d => !isDiagonal(d)).Select(d => createLinesegment(d)).ToList();
-            var lookup = new Dictionary<Tuple<int, int>, int>();
+            var lookup = new Dictionary<(int, int), int>();
             var mapping = segments.Aggregate(lookup, (acc, segment) => {
                 var tuples = segment.ToList().Select(c => c.ToTuple()).ToList();
                 tuples.ForEach(t => {
-                    // Console.WriteLine(t);
                     if (acc.ContainsKey(t)) {
                         acc[t]++;
                     } else {
@@ -68,11 +65,6 @@ namespace Solvers
                 });
                 return acc;
             });
-
-            foreach (var item in mapping)
-            {
-                // Console.WriteLine(item);
-            }
 
             Console.WriteLine(mapping.Values.Where(v => v > 1).Count());
         }
