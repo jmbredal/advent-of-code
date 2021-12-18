@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Day01
+namespace Solvers
 {
     public class Day01Solver
     {
