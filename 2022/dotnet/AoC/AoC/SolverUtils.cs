@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AoC
+﻿namespace AoC
 {
     public static class SolverUtils
     {
@@ -23,6 +17,29 @@ namespace AoC
             return filterNullLines 
                 ? lines.Where(l => !string.IsNullOrEmpty(l)).ToList()
                 : lines.ToList();
+        }
+
+        public static List<List<T>> GroupLines<T>(List<string> lines)
+        {
+            var groups = new List<List<T>>();
+            var group = new List<T>();
+
+            lines.ForEach((line) =>
+            {
+                if (line == "")
+                {
+                    groups.Add(group);
+                    group = new List<T>();
+                }
+                else
+                {
+                    var value = (T) Convert.ChangeType(line, typeof(T));
+                    group.Add(value);
+                }
+            });
+            groups.Add(group);
+
+            return groups;
         }
     }
 }

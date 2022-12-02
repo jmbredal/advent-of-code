@@ -1,37 +1,26 @@
 ﻿using AoC;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Solvers
 {
-    public class Day01Solver
+    public class Day01Solver : Solver
     {
-        public void Solve()
+        public void Solve1()
+        {
+            var sums = GetSums();
+            Console.WriteLine($"Max: {sums[0]}");
+        }
+
+        public void Solve2()
+        {
+            var sums = GetSums();
+            Console.WriteLine($"Sum max three: {sums.GetRange(0, 3).Sum()}");
+        }
+
+        public List<long> GetSums()
         {
             var input = SolverUtils.ParseFile("day01/input");
-
-            var groups = new List<List<long>>();
-            var calories = new List<long>();
-
-            input.ForEach((x) =>
-            {
-                if (x == "")
-                {
-                    groups.Add(calories);
-                    calories = new List<long>();
-                } else
-                {
-                    calories.Add(Int64.Parse(x));
-                }
-            });
-
-            var sums = groups.Select(g => g.Sum()).Order().Reverse().ToList();
-
-            Console.WriteLine($"Max: {sums[0]}");
-            Console.WriteLine($"Sum max three: {sums.GetRange(0, 3).Sum()}");
+            var groups = SolverUtils.GroupLines<long>(input);
+            return groups.Select(g => g.Sum()).Order().Reverse().ToList();
         }
     }
 }
