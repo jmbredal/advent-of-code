@@ -1,5 +1,6 @@
 using AoC;
 using Solvers;
+using System.Security.Cryptography;
 
 namespace AoCTest
 {
@@ -45,6 +46,18 @@ namespace AoCTest
             var score = solver.Score("A X");
 
             Assert.That(score, Is.EqualTo(4));
+        }
+
+        [Test]
+        [TestCase(new[] { 1, 4 }, new[] { 1, 4 }, true)]
+        [TestCase(new[] { 1, 3 }, new[] { 1, 4 }, true)]
+        [TestCase(new[] { 1, 4 }, new[] { 1, 3 }, false)]
+        public void CreateRangeTest(int[] r1, int[] r2, bool result)
+        {
+            var solver = new Day04Solver();
+            var range = solver.RangeFullyContains(r1, r2);
+
+            Assert.That(range, Is.EqualTo(result));
         }
     }
 }

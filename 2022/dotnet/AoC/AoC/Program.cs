@@ -17,7 +17,8 @@ namespace Solvers
             var solvers = new List<Solver>() {
                 //new Day01Solver(),
                 //new Day02Solver(),
-                new Day03Solver(),
+                //new Day03Solver(),
+                new Day04Solver(),
             };
 
             solvers.ForEach(s =>
