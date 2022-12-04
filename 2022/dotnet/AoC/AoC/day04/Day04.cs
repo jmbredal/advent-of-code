@@ -6,21 +6,16 @@ namespace Solvers
     {
         public void Solve1()
         {
-            var result = GetLines().Select(LineFullyContains).Where(x => x).Count();
+            var result = SolverUtils.GetLines<string>("day04/input").Select(LineFullyContains).Where(x => x).Count();
 
             Console.WriteLine(result);
         }
 
         public void Solve2()
         {
-            var result = GetLines().Select(LineOverlaps).Where(x => x).Count();
+            var result = SolverUtils.GetLines<string>("day04/input").Select(LineOverlaps).Where(x => x).Count();
 
             Console.WriteLine(result);
-        }
-
-        private List<string> GetLines()
-        {
-            return SolverUtils.ParseFile("day04/input", true);
         }
 
         bool LineFullyContains(string line)

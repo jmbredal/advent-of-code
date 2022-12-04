@@ -4,19 +4,14 @@ namespace Solvers
 {
     public class Day05Solver : Solver
     {
-        private List<string> GetLines()
-        {
-            return SolverUtils.ParseFile("day05/input", true);
-        }
-
         public void Solve1()
         {
-            var lines = GetLines();
+            var lines = SolverUtils.GetLines<string>("day05/input");
         }
 
         public void Solve2()
         {
-            var lines = GetLines();
+            var lines = SolverUtils.GetLines<string>("day05/input");
         }
     }
 }

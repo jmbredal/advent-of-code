@@ -2,6 +2,11 @@
 {
     public static class SolverUtils
     {
+        public static IEnumerable<T> GetLines<T>(string filename, bool filterNullLines = true)
+        {
+            return SolverUtils.ParseFile(filename, filterNullLines).Select(x => (T)Convert.ChangeType(x, typeof(T)));
+        }
+
         public static List<string> ParseFile(string filename, bool filterNullLines = false, bool unixStyle = false)
         {
             IEnumerable<string> lines;
