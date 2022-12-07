@@ -20,7 +20,9 @@ namespace Solvers
                 //new Day03Solver(),
                 //new Day04Solver(),
                 //new Day05Solver(),
-                new Day06Solver(),
+                //new Day06Solver(),
+                //new Day07Solver(),
+                new Day08Solver(),
             };
 
             solvers.ForEach(s =>
