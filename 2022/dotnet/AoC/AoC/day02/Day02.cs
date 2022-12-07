@@ -2,7 +2,7 @@
 
 namespace Solvers
 {
-    public class Day02Solver: Solver
+    public class Day02Solver: ISolver
     {
         public void Solve1()
         {

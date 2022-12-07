@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Solvers
 {
-    public class Day05Solver : Solver
+    public class Day05Solver : ISolver
     {
         public void Solve1()
         {

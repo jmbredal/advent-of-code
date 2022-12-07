@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Solvers
 {
-    public class Day07Solver : Solver
+    public class Day07Solver : ISolver
     {
         public void Solve1()
         {

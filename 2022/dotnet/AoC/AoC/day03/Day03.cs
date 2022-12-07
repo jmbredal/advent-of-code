@@ -2,7 +2,7 @@
 
 namespace Solvers
 {
-    public class Day03Solver: Solver
+    public class Day03Solver: ISolver
     {
 
         private const string Priorities = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

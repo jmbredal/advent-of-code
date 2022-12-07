@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Solvers
 {
-    interface Solver
+    interface ISolver
     {
         void Solve1();
         void Solve2();
@@ -14,7 +14,7 @@ namespace Solvers
     {
         public static void Main()
         {
-            var solvers = new List<Solver>() {
+            var solvers = new List<ISolver>() {
                 //new Day01Solver(),
                 //new Day02Solver(),
                 //new Day03Solver(),

@@ -1,14 +1,6 @@
-﻿using AoC;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Solvers
+﻿namespace Solvers
 {
-    public class Day06Solver : Solver
+    public class Day06Solver : ISolver
     {
         public void Solve1()
         {
