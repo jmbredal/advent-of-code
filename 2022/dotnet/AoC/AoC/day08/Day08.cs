@@ -1,17 +1,20 @@
 ﻿using AoC;
-using System.Linq;
 
 namespace Solvers
 {
     public class Day08Solver : ISolver
     {
 
-        public List<int[]> GridHorizontal = new List<int[]>();
-        public List<int[]> GridVertical = new List<int[]>();
+        public List<int[]> GridHorizontal = new();
+        public List<int[]> GridVertical = new();
+        public List<(int x, int y)> Coords = new();
+        public int Width = 0;
+        public int Height = 0;
 
         public Day08Solver()
         {
             BuildGrid();
+            BuildCoords();
         }
 
         void BuildGrid()
@@ -32,47 +35,40 @@ namespace Solvers
 
                 GridVertical.Add(temp.ToArray());
             }
+
+            Width = GridVertical.Count;
+            Height = GridHorizontal.Count;
+        }
+
+        void BuildCoords()
+        {
+            for (int y = 0; y < GridHorizontal.Count; y++)
+            {
+                for (int x = 0; x < GridHorizontal[0].Length; x++)
+                {
+                    Coords.Add((x, y));
+                }
+            }
         }
 
         public void Solve1()
         {
-            var counter = 0;
+            var numVisible = Coords.Where(IsVisible).Count();
 
-            for (int y = 0; y < GridHorizontal.Count; y++)
-            {
-                for (int x = 0; x < GridHorizontal[0].Length; x++)
-                {
-                    if (IsVisible(x, y))
-                    {
-                        counter++;
-                    }
-                }
-            }
-
-            Console.WriteLine($"Visible trees: {counter}");
+            Console.WriteLine($"Visible trees: {numVisible}");
         }
 
         public void Solve2()
         {
-            var max = 0;
-            for (int y = 0; y < GridHorizontal.Count; y++)
-            {
-                for (int x = 0; x < GridHorizontal[0].Length; x++)
-                {
-                    var score = GetScore(x, y);
-                    //Console.WriteLine($"Score: {x} {y} {score}");
+            var maxScore = Coords.Select(GetScore).Max();
 
-                    max = score > max ? score : max;
-                }
-            }
-
-            Console.WriteLine($"Max score: {max}");
+            Console.WriteLine($"Max score: {maxScore}");
         }
 
         bool IsEdge(int x, int y)
         {
-            var maxX = GridHorizontal[0].Length - 1;
-            var maxY = GridVertical[0].Length - 1;
+            var maxX = Width - 1;
+            var maxY = Height - 1;
             if (x == 0 || x == maxX || y == 0 || y == maxY)
             {
                 return true;
@@ -81,87 +77,47 @@ namespace Solvers
             return false;
         }
 
-        bool IsVisible(int x, int y)
+        bool IsVisible((int x, int y) tuple)
         {
-            if (IsEdge(x, y))
-            {
-                return true;
-            }
+            var (x, y) = tuple;
 
-            // Target tree
-            var target = GridVertical[x][y];
+            if (IsEdge(x, y)) return true;
 
-            var leftMax = GridHorizontal[y][0..x].Max();
-            var rightMax = GridHorizontal[y][(x + 1)..^0].Max();
-            var topMax = GridVertical[x][0..y].Max();
-            var bottomMax = GridVertical[x][(y + 1)..^0].Max();
-
-            var maxes = new List<int>() { leftMax, rightMax, topMax, bottomMax };
-
-            // If max of all trees in any direction is less than target height, it is visible
-            return maxes.Any(m => m < target);
+            // If max height of trees in any direction is less than target height, it is visible
+            return new List<int>() {
+                GridHorizontal[y][0..x].Max(), // west
+                GridHorizontal[y][(x + 1)..^0].Max(),  // east 
+                GridVertical[x][0..y].Max(),  // north 
+                GridVertical[x][(y + 1)..^0].Max(), // south
+            }.Any(m => m < GridVertical[x][y]);
         }
 
-        int GetScore(int x, int y)
+        int GetScore((int x, int y) tuple)
         {
-            if (IsEdge(x, y))
-            {
-                return 0;
-            }
+            var (x, y) = tuple;
 
-            var counterLeft = 0;
-            var counterRight = 0;
-            var counterTop = 0;
-            var counterBottom = 0;
+            if (IsEdge(x, y)) return 0;
 
             var currentTreeHeight = GridHorizontal[y][x];
+            Predicate<int> IsBlocking = h => h >= currentTreeHeight;
+            Func<int[], int> GetTreeVisibility = trees => GetVisibility(IsBlocking, trees);
 
-            // Look left
-            for (int i = x - 1; i >= 0; i--)
+            // Get tree visibility in all directions and find score
+            return new List<int[]>
             {
-                counterLeft++;
+                GridHorizontal[y][0..x].Reverse().ToArray(), // west
+                GridHorizontal[y][(x + 1)..^0], // east
+                GridVertical[x][0..y].Reverse().ToArray(), // north
+                GridVertical[x][(y + 1)..^0],  // south
+            }.Select(GetTreeVisibility)
+             .Aggregate(1, (totalScore, score) => totalScore * score);
+        }
 
-                if (GridHorizontal[y][i] >= currentTreeHeight)
-                {
-                    break;
-                }
-            }
-
-            // Look right
-            for (int i = x + 1; i < GridHorizontal[0].Length; i++)
-            {
-                counterRight++;
-
-                if (GridHorizontal[y][i] >= currentTreeHeight)
-                {
-                    break;
-                }
-            }
-
-            // Look north
-            for (int i = y - 1; i >= 0; i--)
-            {
-                counterTop++;
-
-                if (GridVertical[x][i] >= currentTreeHeight)
-                {
-                    break;
-                }
-            }
-
-            // Look south
-            for (int i = y + 1; i < GridVertical[0].Length; i++)
-            {
-                counterBottom++;
-
-                if (GridVertical[x][i] >= currentTreeHeight)
-                {
-                    break;
-                }
-            }
-
-            var score = counterLeft * counterRight * counterTop * counterBottom;
-            return score;
+        int GetVisibility(Predicate<int> pred, int[] trees)
+        {
+            var index = trees.ToList().FindIndex(pred);
+            
+            return index < 0 ? trees.Length : index + 1;
         }
     }
 }
