@@ -1,4 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
+// See https://aka.ms/new-console-template for more information
 using Solvers;
 using System.ComponentModel.DataAnnotations;
 
@@ -23,7 +24,9 @@ namespace Solvers
                 //new Day06Solver(),
                 //new Day07Solver(),
                 //new Day08Solver(),
-                new Day09Solver(),
+                //new Day09Solver(),
+                //new Day10Solver(),
+                new Day11Solver(),
             };
 
             solvers.ForEach(s =>

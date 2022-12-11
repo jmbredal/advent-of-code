@@ -1,12 +1,14 @@
 ﻿using AoC;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
+
+using System.Linq;
+using System.Reflection;
 
 namespace Solvers
 {
     public class Day09Solver : ISolver
     {
+
+        public List<List<(int x, int y)>> Snake { get; set; } = new();
 
         public Day09Solver()
         {
@@ -14,111 +16,131 @@ namespace Solvers
 
         public void Solve1()
         {
+            var headMoves = new List<(int x, int y)> { (0, 0) };
+            var tailMoves = new List<(int x, int y)> { (0, 0) };
+            var snake = new List<List<(int x, int y)>> { headMoves, tailMoves };
             var lines = SolverUtils.GetLines<string>("day09/input").ToList();
-            Run(lines);
+
+            lines.ForEach(line => HandleLine(line, snake));
+            UpdatePositions(snake);
+
+            var positions = snake.Last().Distinct().Count();
+
+            Console.WriteLine($"Positions: {positions}");
         }
 
         public void Solve2()
         {
+            var headMoves = new List<(int x, int y)> { (0, 0) };
+            var snake = new List<List<(int x, int y)>> { headMoves };
+
+            for (int i = 0; i < 9; i++)
+            {
+                snake.Add(new List<(int x, int y)> { (0, 0) });
+            }
+
+            var lines = SolverUtils.GetLines<string>("day09/input").ToList();
+
+            lines.ForEach(line => HandleLine(line, snake));
+            UpdatePositions(snake);
+
+            var positions = snake.Last().Distinct().Count();
+
+            Console.WriteLine($"Positions: {positions}");
+            Console.WriteLine($"head {snake[0].Last()}");
         }
 
-        void Run(List<string> lines)
+        void UpdatePositions(List<List<(int x, int y)>> snake)
         {
-            var headPositions = new List<(int x, int y)>
+            var moves = snake[0];
+            moves.ForEach(headMove =>
             {
-                (0, 0),
-            };
-
-            var tailPositions = new List<(int x, int y)>
-            {
-                (0, 0),
-            };
-
-            lines.ForEach(line =>
-            {
-                var parts = line.Split(' ');
-                var moveCount = Int32.Parse(parts[1]);
-                var dir = parts[0];
-
-                switch (dir)
+                //Console.WriteLine(headMove);
+                // for each element in the snake, move it according to the leader
+                for (int i = 1; i < snake.Count; i++)
                 {
-                    case "R":
-                        for (int i = 0; i < moveCount; i++)
-                        {
-                            var lastPos = headPositions.Last();
-                            var newPos = (lastPos.x + 1, lastPos.y);
-                            headPositions.Add(newPos);
+                    var part = snake[i];
+                    var myPos = part.Last();
+                    var leaderPos = i == 1 ? headMove : snake[i - 1].Last();
 
-                            if (MustFollow(newPos, tailPositions.Last()))
-                            {
-                                tailPositions.Add(lastPos);
-                            }
-                        }
-                        break;
-                    case "L":
-                        for (int i = 0; i < moveCount; i++)
-                        {
-                            var lastPos = headPositions.Last();
-                            var newPos = (lastPos.x - 1, lastPos.y);
-                            headPositions.Add(newPos);
-
-                            if (MustFollow(newPos, tailPositions.Last()))
-                            {
-                                tailPositions.Add(lastPos);
-                            }
-                        }
-                        break;
-                    case "U":
-                        for (int i = 0; i < moveCount; i++)
-                        {
-                            var lastPos = headPositions.Last();
-                            var newPos = (lastPos.x, lastPos.y + 1);
-                            headPositions.Add(newPos);
-
-                            if (MustFollow(newPos, tailPositions.Last()))
-                            {
-                                tailPositions.Add(lastPos);
-                            }
-                        }
-                        break;
-                    case "D":
-                        for (int i = 0; i < moveCount; i++)
-                        {
-                            var lastPos = headPositions.Last();
-                            var newPos = (lastPos.x, lastPos.y - 1);
-                            headPositions.Add(newPos);
-
-                            if (MustFollow(newPos, tailPositions.Last()))
-                            {
-                                tailPositions.Add(lastPos);
-                            }
-                        }
-                        break;
+                    var move = GetMove(myPos, leaderPos);
+                    if (move.HasValue)
+                    {
+                        //Console.WriteLine($"Moving to {move.Value}");
+                        part.Add(move.Value);
+                    }
                 }
             });
 
-            headPositions.ForEach(p =>
-            {
-                Console.WriteLine(p);
-            });
-
-            Console.WriteLine("-");
-
-            tailPositions.ForEach(p =>
-            {
-                Console.WriteLine(p);
-            });
-
-            Console.WriteLine(tailPositions.Distinct().Count());
         }
 
-        bool MustFollow((int x, int y) head, (int x, int y) tail)
+        void HandleLine(string line, List<List<(int x, int y)>> snake)
         {
-            var (xHead, yHead) = head;
-            var (xTail, yTail) = tail;
+            var lineParts = line.Split(' ');
+            var dir = lineParts[0];
+            var count = Int32.Parse(lineParts[1]);
 
-            return Math.Abs(xHead - xTail) > 1 || Math.Abs(yHead - yTail) > 1;
+            var headMoves = snake[0];
+
+            for (int i = 0; i < count; i++)
+            {
+                headMoves.Add(GetHeadMove(dir, headMoves.Last()));
+            }
         }
 
+        (int x, int y) GetHeadMove(string dir, (int x, int y) prevMove)
+        {
+            return dir switch
+            {
+                "R" => (prevMove.x + 1, prevMove.y),
+                "U" => (prevMove.x, prevMove.y + 1),
+                "L" => (prevMove.x - 1, prevMove.y),
+                "D" => (prevMove.x, prevMove.y - 1),
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        (int x, int y)? GetMove((int x, int y) followerPos, (int x, int y) leaderPos)
+        {
+            var (followerX, followerY) = followerPos;
+            var (leaderX, leaderY) = leaderPos;
+
+            var x = followerX;
+            var y = followerY;
+
+            if (leaderX - followerX > 1)
+            {
+                x++;
+                if (leaderY > followerY) y++;
+                if (leaderY < followerY) y--;
+                return (x, y);
+            }
+
+            if (followerX - leaderX > 1)
+            {
+                x--;
+                if (leaderY > followerY) y++;
+                if (leaderY < followerY) y--;
+                return (x, y);
+            }
+
+            if (leaderY - followerY > 1)
+            {
+                y++;
+                if (leaderX > followerX) x++;
+                if (leaderX < followerX) x--;
+                return (x, y);
+            }
+
+            if (followerY - leaderY > 1)
+            {
+                y--;
+                if (leaderX > followerX) x++;
+                if (leaderX < followerX) x--;
+                return (x, y);
+            }
+
+            return null;
+        }
     }
 }
