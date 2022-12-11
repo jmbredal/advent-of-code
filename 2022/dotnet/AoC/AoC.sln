@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC", "AoC\AoC.csproj", "{681A2832-CD10-4C48-A348-966E1F8CBF83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoCTest", "AoCTest\AoCTest.csproj", "{D7846338-9614-495F-9417-C7CE1FF656F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{681A2832-CD10-4C48-A348-966E1F8CBF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{681A2832-CD10-4C48-A348-966E1F8CBF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{681A2832-CD10-4C48-A348-966E1F8CBF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{681A2832-CD10-4C48-A348-966E1F8CBF83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7846338-9614-495F-9417-C7CE1FF656F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7846338-9614-495F-9417-C7CE1FF656F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7846338-9614-495F-9417-C7CE1FF656F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7846338-9614-495F-9417-C7CE1FF656F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98F8D5F2-FF26-4B55-8517-659274FA24C7}
+	EndGlobalSection
+EndGlobal
